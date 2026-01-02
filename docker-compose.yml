@@ -5,7 +5,7 @@ services:
     build: .
     container_name: local-ai-chat
     ports:
-      - "5000:5000"
+      - "5000"
     environment:
       # This overrides the default in the Python script.
       # 'host.docker.internal' allows the container to talk to your computer's localhost.
@@ -14,3 +14,8 @@ services:
     # This section is critical for Linux users to resolve 'host.docker.internal'
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+networks:
+    default:
+        name: MyNetwork
+        external: true

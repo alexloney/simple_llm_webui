@@ -53,7 +53,6 @@ def health_check():
     """Checks if LM Studio is reachable."""
     try:
         # Attempt to fetch models to verify connection
-        # A short timeout is ideal here, but the client defaults are usually okay for localhost
         client.models.list() 
         return jsonify({"status": "online"})
     except Exception as e:
@@ -65,6 +64,8 @@ def chat():
     user_input = data.get('message')
     incoming_history = data.get('history', [])
     persona = data.get('persona', "You are a helpful AI assistant.")
+    # Capture temperature, default to 0.7 if not provided
+    temperature = float(data.get('temperature', 0.7))
     
     if not user_input:
         return "No message provided", 400
@@ -96,7 +97,7 @@ def chat():
             stream = client.chat.completions.create(
                 model="local-model",
                 messages=processing_history,
-                temperature=0.7,
+                temperature=temperature, # Use the dynamic temperature
                 stream=True
             )
 
