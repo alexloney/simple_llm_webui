@@ -3,80 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local AI Chat - Pro</title>
+    <title>Local AI Chat - Dark Mode</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; color: #333; }
+        /* Dark Theme Variables */
+        :root {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --muted-text: #a0a0a0;
+            --border-color: #333;
+            --input-bg: #2c2c2c;
+            --user-msg-bg: #1e88e5; /* Muted Blue */
+            --bot-msg-bg: #2d2d2d;
+            --accent-color: #4caf50; /* Green */
+            --accent-hover: #43a047;
+            --stop-color: #e53935;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+        }
         
+        h1 { text-align: center; color: var(--text-color); margin-bottom: 30px; }
+
         /* Input Group Styling */
-        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        label { font-weight: 600; font-size: 0.9em; color: #555; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: 600; font-size: 0.9em; color: var(--muted-text); }
         
-        #persona-input { padding: 10px; border-radius: 6px; border: 1px solid #ccc; background-color: #fff3cd; border-color: #ffeeba; width: 100%; box-sizing: border-box; }
-        #persona-input:disabled { background-color: #e9ecef; border-color: #dee2e6; color: #6c757d; cursor: not-allowed; }
+        #persona-input { 
+            padding: 12px; 
+            border-radius: 6px; 
+            border: 1px solid #444; 
+            background-color: #2a2a20; /* Very dark yellow tint */
+            color: #fdd835; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-family: inherit;
+        }
+        #persona-input:disabled { 
+            background-color: var(--input-bg); 
+            border-color: var(--border-color); 
+            color: var(--muted-text); 
+            cursor: not-allowed; 
+        }
+        #persona-input::placeholder { color: #666; }
 
         /* Chat Box Styling */
         #chat-box { 
-            height: 550px; 
-            border: 1px solid #e0e0e0; 
+            height: 600px; 
+            border: 1px solid var(--border-color); 
             overflow-y: scroll; 
             padding: 20px; 
-            background: white; 
+            background: var(--container-bg); 
             border-radius: 10px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             margin-bottom: 20px;
             display: flex;
             flex-direction: column;
         }
 
-        .message { margin: 12px 0; padding: 12px 16px; border-radius: 12px; max-width: 85%; line-height: 1.6; word-wrap: break-word; }
-        .user { align-self: flex-end; background-color: #007bff; color: white; border-bottom-right-radius: 2px; }
-        .bot { align-self: flex-start; background-color: #f1f3f5; color: #333; border-bottom-left-radius: 2px; }
+        /* Scrollbar Styling for Dark Mode */
+        #chat-box::-webkit-scrollbar { width: 8px; }
+        #chat-box::-webkit-scrollbar-track { background: var(--container-bg); }
+        #chat-box::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        #chat-box::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        .message { margin: 12px 0; padding: 12px 16px; border-radius: 8px; max-width: 85%; line-height: 1.6; word-wrap: break-word; }
+        .user { align-self: flex-end; background-color: var(--user-msg-bg); color: white; border-bottom-right-radius: 2px; }
+        .bot { align-self: flex-start; background-color: var(--bot-msg-bg); color: var(--text-color); border-bottom-left-radius: 2px; border: 1px solid var(--border-color); }
         
         /* Markdown Styles */
-        .bot pre { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 6px; overflow-x: auto; margin: 10px 0; }
-        .bot code { font-family: "Consolas", "Monaco", monospace; background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 3px; font-size: 0.9em; }
+        .bot pre { background: #111; color: #f8f8f2; padding: 15px; border-radius: 6px; overflow-x: auto; margin: 10px 0; border: 1px solid #333; }
+        .bot code { font-family: "Consolas", "Monaco", monospace; background: rgba(255,255,255,0.1); padding: 2px 5px; border-radius: 3px; font-size: 0.9em; color: #ff79c6; }
         .bot pre code { background: transparent; padding: 0; color: inherit; }
         .bot p { margin: 0 0 10px 0; }
         .bot p:last-child { margin-bottom: 0; }
+        .bot strong { color: #fff; }
         
         /* Input Area Styling */
         #input-area { display: flex; gap: 10px; align-items: flex-end; }
         
-        /* Textarea for multi-line support */
         textarea { 
             flex-grow: 1; 
-            padding: 12px; 
+            padding: 14px; 
             border-radius: 8px; 
-            border: 1px solid #ccc; 
+            border: 1px solid var(--border-color); 
+            background-color: var(--input-bg);
+            color: white;
             font-family: inherit; 
-            resize: none; /* Prevent manual resizing */
-            height: 24px; /* Initial height */
+            resize: none; 
+            height: 24px; 
             max-height: 150px;
             overflow-y: hidden;
             line-height: 1.4;
         }
-        textarea:focus { outline: 2px solid #007bff; border-color: transparent; }
+        textarea:focus { outline: 2px solid var(--user-msg-bg); border-color: transparent; }
 
         /* Buttons */
-        button { padding: 12px 24px; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; height: 50px; }
+        button { padding: 0 24px; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; height: 54px; }
         
-        #send-btn { background-color: #28a745; }
-        #send-btn:hover { background-color: #218838; }
+        #send-btn { background-color: var(--accent-color); }
+        #send-btn:hover { background-color: var(--accent-hover); }
         
-        /* Hidden Stop Button */
-        #stop-btn { background-color: #dc3545; display: none; }
-        #stop-btn:hover { background-color: #c82333; }
+        #stop-btn { background-color: var(--stop-color); display: none; }
+        #stop-btn:hover { background-color: #c62828; }
 
-        button:disabled { background-color: #ccc; cursor: default; }
+        button:disabled { background-color: #444; color: #888; cursor: default; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align: center; color: #444;">Local AI Chat</h1>
+    <h1>Local AI Chat</h1>
 
     <div class="input-group">
-        <label for="persona-input">System Persona:</label>
+        <label for="persona-input">System Persona</label>
         <input type="text" id="persona-input" placeholder="e.g., You are a senior Python engineer..." autocomplete="off">
     </div>
     
@@ -93,7 +139,7 @@
         </div>
     </form>
 
-<script>
+    <script>
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const personaInput = document.getElementById('persona-input');
@@ -103,35 +149,28 @@
 
         let abortController = null;
 
-        // Reset memory on load
         window.onload = async () => {
             try { await fetch('/reset', { method: 'POST' }); } catch(e) {}
         };
 
-        // Auto-expand textarea
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
             if (this.value === '') this.style.height = '24px';
         });
 
-        // Handle Enter key (Shift+Enter for new line)
         userInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Stop newline and default form submit
-                if (!sendBtn.disabled) {
-                    sendMessage(); // Call logic directly
-                }
+                e.preventDefault();
+                if (!sendBtn.disabled) sendMessage();
             }
         });
 
-        // Handle Form Submit (Clicking the Send button)
         chatForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Stop page reload
+            e.preventDefault();
             sendMessage();
         });
 
-        // Handle Stop Button
         stopBtn.addEventListener('click', () => {
             if (abortController) {
                 abortController.abort();
@@ -141,16 +180,13 @@
             }
         });
 
-        // --- Core Logic Function ---
         async function sendMessage() {
             const message = userInput.value.trim();
             const persona = personaInput.value;
             if (!message) return;
 
-            // Lock persona
             if (!personaInput.disabled) personaInput.disabled = true;
 
-            // UI Updates
             appendMessage(escapeHtml(message), 'user');
             userInput.value = '';
             userInput.style.height = '24px';
