@@ -3,132 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local AI Chat - Streaming</title>
+    <title>Local AI Chat - Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; color: #333; }
         
+        /* Input Group Styling */
         .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        label { font-weight: bold; font-size: 0.9em; color: #555; }
+        label { font-weight: 600; font-size: 0.9em; color: #555; }
         
-        input[type="text"] { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit; }
-        #persona-input { background-color: #fff3cd; border-color: #ffeeba; width: 100%; box-sizing: border-box; }
-        #persona-input:disabled { background-color: #e9ecef; border-color: #ccc; color: #6c757d; cursor: not-allowed; }
+        #persona-input { padding: 10px; border-radius: 6px; border: 1px solid #ccc; background-color: #fff3cd; border-color: #ffeeba; width: 100%; box-sizing: border-box; }
+        #persona-input:disabled { background-color: #e9ecef; border-color: #dee2e6; color: #6c757d; cursor: not-allowed; }
 
+        /* Chat Box Styling */
         #chat-box { 
-            height: 500px; 
-            border: 1px solid #ccc; 
+            height: 550px; 
+            border: 1px solid #e0e0e0; 
             overflow-y: scroll; 
             padding: 20px; 
             background: white; 
-            border-radius: 8px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             margin-bottom: 20px;
             display: flex;
             flex-direction: column;
         }
 
-        .message { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; line-height: 1.5; word-wrap: break-word; }
-        .user { align-self: flex-end; background-color: #007bff; color: white; }
-        .bot { align-self: flex-start; background-color: #e9ecef; color: black; }
+        .message { margin: 12px 0; padding: 12px 16px; border-radius: 12px; max-width: 85%; line-height: 1.6; word-wrap: break-word; }
+        .user { align-self: flex-end; background-color: #007bff; color: white; border-bottom-right-radius: 2px; }
+        .bot { align-self: flex-start; background-color: #f1f3f5; color: #333; border-bottom-left-radius: 2px; }
         
         /* Markdown Styles */
-        .bot pre { background: #dcdcdc; padding: 10px; border-radius: 5px; overflow-x: auto; }
-        .bot code { font-family: monospace; background: #dcdcdc; padding: 2px 4px; border-radius: 3px; }
+        .bot pre { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 6px; overflow-x: auto; margin: 10px 0; }
+        .bot code { font-family: "Consolas", "Monaco", monospace; background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 3px; font-size: 0.9em; }
+        .bot pre code { background: transparent; padding: 0; color: inherit; }
         .bot p { margin: 0 0 10px 0; }
         .bot p:last-child { margin-bottom: 0; }
         
-        #input-area { display: flex; gap: 10px; }
-        #user-input { flex-grow: 1; }
-        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background-color: #218838; }
-        button:disabled { background-color: #ccc; }
+        /* Input Area Styling */
+        #input-area { display: flex; gap: 10px; align-items: flex-end; }
+        
+        /* Textarea for multi-line support */
+        textarea { 
+            flex-grow: 1; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #ccc; 
+            font-family: inherit; 
+            resize: none; /* Prevent manual resizing */
+            height: 24px; /* Initial height */
+            max-height: 150px;
+            overflow-y: hidden;
+            line-height: 1.4;
+        }
+        textarea:focus { outline: 2px solid #007bff; border-color: transparent; }
+
+        /* Buttons */
+        button { padding: 12px 24px; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; height: 50px; }
+        
+        #send-btn { background-color: #28a745; }
+        #send-btn:hover { background-color: #218838; }
+        
+        /* Hidden Stop Button */
+        #stop-btn { background-color: #dc3545; display: none; }
+        #stop-btn:hover { background-color: #c82333; }
+
+        button:disabled { background-color: #ccc; cursor: default; }
     </style>
 </head>
 <body>
 
-    <h1>LM Studio Chat (Streaming)</h1>
+    <h1 style="text-align: center; color: #444;">Local AI Chat</h1>
 
     <div class="input-group">
         <label for="persona-input">System Persona:</label>
-        <input type="text" id="persona-input" placeholder="e.g., You are a helpful coder..." autocomplete="off">
+        <input type="text" id="persona-input" placeholder="e.g., You are a senior Python engineer..." autocomplete="off">
     </div>
     
     <div id="chat-box">
-        <div class="message bot">Ready to chat!</div>
+        <div class="message bot">Ready to chat! Use <b>Shift+Enter</b> for new lines.</div>
     </div>
 
     <form id="chat-form">
         <div id="input-area">
-            <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off" required>
+            <textarea id="user-input" placeholder="Type a message..." rows="1" required></textarea>
+            
             <button type="submit" id="send-btn">Send</button>
+            <button type="button" id="stop-btn">Stop</button>
         </div>
     </form>
 
-    <script>
+<script>
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const personaInput = document.getElementById('persona-input');
         const chatBox = document.getElementById('chat-box');
         const sendBtn = document.getElementById('send-btn');
+        const stopBtn = document.getElementById('stop-btn');
+
+        let abortController = null;
 
         // Reset memory on load
         window.onload = async () => {
             try { await fetch('/reset', { method: 'POST' }); } catch(e) {}
         };
 
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const message = userInput.value;
+        // Auto-expand textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.value === '') this.style.height = '24px';
+        });
+
+        // Handle Enter key (Shift+Enter for new line)
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Stop newline and default form submit
+                if (!sendBtn.disabled) {
+                    sendMessage(); // Call logic directly
+                }
+            }
+        });
+
+        // Handle Form Submit (Clicking the Send button)
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Stop page reload
+            sendMessage();
+        });
+
+        // Handle Stop Button
+        stopBtn.addEventListener('click', () => {
+            if (abortController) {
+                abortController.abort();
+                abortController = null;
+                endGenerationState();
+                appendMessage("<i>Generation stopped by user.</i>", 'bot');
+            }
+        });
+
+        // --- Core Logic Function ---
+        async function sendMessage() {
+            const message = userInput.value.trim();
             const persona = personaInput.value;
             if (!message) return;
 
             // Lock persona
             if (!personaInput.disabled) personaInput.disabled = true;
 
-            // 1. Add User Message
+            // UI Updates
             appendMessage(escapeHtml(message), 'user');
             userInput.value = '';
-            sendBtn.disabled = true;
+            userInput.style.height = '24px';
+            startGenerationState();
 
-            // 2. Create a placeholder for the Bot's response
             const botMessageDiv = appendMessage('', 'bot'); 
             let fullBotResponse = "";
 
+            abortController = new AbortController();
+
             try {
-                // 3. Initiate the request
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message, persona: persona })
+                    body: JSON.stringify({ message: message, persona: persona }),
+                    signal: abortController.signal
                 });
 
-                // 4. Setup the stream reader
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
 
-                // 5. Read the stream loop
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    // Decode chunk and append to our local string
                     const chunk = decoder.decode(value, { stream: true });
                     fullBotResponse += chunk;
 
-                    // Update the UI immediately with rendered Markdown
                     botMessageDiv.innerHTML = marked.parse(fullBotResponse);
-                    
-                    // Auto-scroll
-                    chatBox.scrollTop = chatBox.scrollHeight;
+                    smartScroll();
                 }
 
             } catch (error) {
-                botMessageDiv.textContent = "Error: Connection failed.";
+                if (error.name !== 'AbortError') {
+                    botMessageDiv.textContent = "Error: Connection failed.";
+                }
             } finally {
-                sendBtn.disabled = false;
-                userInput.focus();
+                endGenerationState();
+                abortController = null;
             }
-        });
+        }
+
+        function startGenerationState() {
+            sendBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            userInput.disabled = true;
+        }
+
+        function endGenerationState() {
+            sendBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            userInput.disabled = false;
+            userInput.focus();
+        }
 
         function appendMessage(htmlContent, sender) {
             const messageDiv = document.createElement('div');
@@ -136,13 +212,23 @@
             messageDiv.innerHTML = htmlContent;
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
-            return messageDiv; // Return the div so we can update it later
+            return messageDiv;
+        }
+
+        function smartScroll() {
+            const threshold = 100;
+            const position = chatBox.scrollTop + chatBox.clientHeight;
+            const height = chatBox.scrollHeight;
+
+            if (height - position < threshold) {
+                chatBox.scrollTop = height;
+            }
         }
 
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
-            return div.innerHTML;
+            return div.innerHTML.replace(/\n/g, '<br>');
         }
     </script>
 </body>
