@@ -19,6 +19,7 @@
             --user-msg-text: #333333;
             --hover-bg: #2a2a2a;
             --menu-bg: #2d2d2d;
+            --drag-bg: #444;
         }
         
         body, html { height: 100%; margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow: hidden; }
@@ -41,8 +42,32 @@
         .sidebar-header h2 { margin: 0; font-size: 1.1em; }
         .new-chat-btn { background: var(--accent-color); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 1.2em; }
         
-        #chat-list { flex-grow: 1; overflow-y: auto; padding: 10px; list-style: none; margin: 0; }
+        /* Sidebar Lists Area */
+        #sidebar-content { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         
+        .chat-list { list-style: none; margin: 0; padding: 0; }
+        
+        /* Section Dividers */
+        .section-header {
+            font-size: 0.75em;
+            color: #666;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            padding-left: 5px;
+            display: none; /* Hidden by default */
+        }
+        .section-header.visible { display: block; }
+        
+        .separator {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 5px 0;
+            display: none;
+        }
+        .separator.visible { display: block; }
+
+        /* Chat Tabs */
         .chat-tab {
             padding: 10px;
             margin-bottom: 5px;
@@ -54,16 +79,19 @@
             background: transparent;
             color: var(--muted-text);
             transition: background 0.2s;
-            position: relative; /* For dropdown positioning */
+            position: relative;
+            border: 1px solid transparent; 
         }
         .chat-tab:hover { background-color: var(--hover-bg); }
         .chat-tab.active { background-color: #333; color: white; font-weight: bold; }
         
-        /* Chat Title & Icon */
-        .chat-title-wrapper { display: flex; align-items: center; gap: 5px; overflow: hidden; max-width: 190px; }
+        /* Dragging Styles */
+        .chat-tab.dragging { opacity: 0.5; background-color: var(--drag-bg); border: 1px dashed #666; }
+        .chat-tab.drag-over { border-bottom: 2px solid var(--accent-color); }
+
+        .chat-title-wrapper { display: flex; align-items: center; gap: 5px; overflow: hidden; max-width: 190px; pointer-events: none; }
         .pinned-icon { font-size: 0.8em; color: var(--accent-color); }
         
-        /* Menu Button (...) */
         .menu-btn { background: transparent; border: none; color: #666; cursor: pointer; font-size: 1.2em; padding: 0 8px; border-radius: 4px; }
         .menu-btn:hover { color: white; background-color: rgba(255,255,255,0.1); }
 
@@ -96,7 +124,6 @@
         /* Main Content */
         #main-content { flex-grow: 1; display: flex; flex-direction: column; position: relative; height: 100%; }
 
-        /* Mobile Header (Hamburger) */
         #mobile-header { display: none; padding: 10px; background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); align-items: center; }
         #menu-btn { background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; margin-right: 15px; }
 
@@ -105,7 +132,6 @@
         
         .message { margin: 12px 0; padding: 12px 16px; border-radius: 8px; max-width: 85%; line-height: 1.6; word-wrap: break-word; }
         
-        /* User Bubble Style */
         .user { 
             align-self: flex-end; 
             background-color: var(--user-msg-bg); 
@@ -114,7 +140,6 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
-        /* Bot Style */
         .bot { 
             align-self: flex-start; 
             background-color: transparent; 
@@ -125,7 +150,6 @@
             max-width: 90%;
         }
         
-        /* Markdown Code Blocks */
         .bot pre { background: #111; padding: 15px; border-radius: 6px; overflow-x: auto; border: 1px solid #333; }
         .bot code { font-family: monospace; background: rgba(255,255,255,0.1); padding: 2px 5px; border-radius: 3px; color: #e0e0e0; }
         
@@ -133,6 +157,7 @@
         #input-area-wrapper { padding: 20px; border-top: 1px solid var(--border-color); background: var(--chat-bg); }
         .input-controls { display: flex; gap: 10px; margin-bottom: 10px; }
         #persona-input { flex-grow: 1; padding: 8px; background: #2a2a20; border: 1px solid #444; color: #fdd835; border-radius: 4px; }
+        #persona-input:disabled { background-color: #333; color: #666; border-color: #444; cursor: not-allowed; }
         
         #input-form { display: flex; gap: 10px; align-items: flex-end; }
         textarea { flex-grow: 1; padding: 12px; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 6px; resize: none; height: 24px; max-height: 150px; }
@@ -142,7 +167,6 @@
         #send-btn { background: var(--accent-color); }
         #stop-btn { background: #e53935; display: none; }
 
-        /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
             #chat-history-container { padding: 15px; }
             #app-container { position: relative; }
@@ -160,8 +184,15 @@
                 <h2>Chats</h2>
                 <button class="new-chat-btn" onclick="createNewChat()" title="New Chat">+</button>
             </div>
-            <ul id="chat-list">
-                </ul>
+            
+            <div id="sidebar-content">
+                <div id="pinned-header" class="section-header">Pinned</div>
+                <ul id="pinned-list" class="chat-list"></ul>
+                
+                <div id="list-separator" class="separator"></div>
+
+                <ul id="unpinned-list" class="chat-list"></ul>
+            </div>
         </aside>
 
         <main id="main-content">
@@ -194,9 +225,14 @@
         let chats = []; 
         let currentChatId = null;
         let abortController = null;
-        let activeMenuId = null; // Track which menu is open
+        let activeMenuId = null; 
+        let draggedItemIndex = null;
 
-        const chatListEl = document.getElementById('chat-list');
+        const pinnedListEl = document.getElementById('pinned-list');
+        const unpinnedListEl = document.getElementById('unpinned-list');
+        const pinnedHeaderEl = document.getElementById('pinned-header');
+        const separatorEl = document.getElementById('list-separator');
+        
         const chatContainerEl = document.getElementById('chat-history-container');
         const userInput = document.getElementById('user-input');
         const personaInput = document.getElementById('persona-input');
@@ -226,8 +262,19 @@
         }
 
         function saveChats() {
+            // Ensure sorting is preserved in storage
+            sortChats();
             localStorage.setItem('local_ai_chats', JSON.stringify(chats));
             renderChatList();
+        }
+
+        function sortChats() {
+            // Sort by pinned status (Pinned first). 
+            // Note: Within sections, we rely on the existing array order (drag and drop order)
+            chats.sort((a, b) => {
+                if (a.pinned === b.pinned) return 0;
+                return a.pinned ? -1 : 1;
+            });
         }
 
         // --- SIDEBAR & TABS ---
@@ -240,26 +287,54 @@
                 messages: [],
                 persona: ""
             };
+            // Add new chat. If unpinned, add after pinned items.
+            // Simplified: Unshift to top, then sort will place it correctly (top of unpinned)
             chats.unshift(newChat);
             saveChats();
             switchChat(newId);
             if (window.innerWidth <= 768) toggleSidebar(false);
         }
 
-        // --- MENU LOGIC (Rename, Pin, Delete) ---
+        // --- DRAG AND DROP HANDLERS ---
+        function handleDragStart(e, index) {
+            draggedItemIndex = index;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
 
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDrop(e, targetIndex) {
+            e.preventDefault();
+            document.querySelectorAll('.chat-tab').forEach(el => el.classList.remove('dragging'));
+
+            if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
+
+            // SECTION GUARD: Prevent dragging between Pinned and Unpinned
+            if (chats[draggedItemIndex].pinned !== chats[targetIndex].pinned) {
+                return; // Do nothing
+            }
+
+            // Move Item
+            const itemToMove = chats[draggedItemIndex];
+            chats.splice(draggedItemIndex, 1); 
+            chats.splice(targetIndex, 0, itemToMove); 
+
+            saveChats(); 
+            draggedItemIndex = null;
+        }
+
+        // --- MENU LOGIC ---
         function toggleMenu(e, id) {
-            e.stopPropagation(); // Prevent tab switching
-            
-            // Close existing open menu if it's not this one
+            e.stopPropagation(); 
             if (activeMenuId && activeMenuId !== id) {
                 document.getElementById(`menu-${activeMenuId}`).classList.remove('show');
             }
-
             const menu = document.getElementById(`menu-${id}`);
             const isHidden = !menu.classList.contains('show');
-            
-            // Toggle
             if (isHidden) {
                 menu.classList.add('show');
                 activeMenuId = id;
@@ -270,22 +345,21 @@
         }
 
         function renameChat(e, id) {
-            e.stopPropagation(); // Stop bubbling
+            e.stopPropagation();
             const chat = chats.find(c => c.id === id);
             const newName = prompt("Rename chat to:", chat.title);
-            
             if (newName && newName.trim() !== "") {
                 chat.title = newName.trim();
                 saveChats();
             }
-            activeMenuId = null; // Menu re-renders closed
+            activeMenuId = null; 
         }
 
         function togglePin(e, id) {
             e.stopPropagation();
             const chat = chats.find(c => c.id === id);
-            chat.pinned = !chat.pinned; // Toggle
-            saveChats();
+            chat.pinned = !chat.pinned;
+            saveChats(); // This triggers sort and re-render
             activeMenuId = null;
         }
 
@@ -299,38 +373,33 @@
             if (chats.length === 0) {
                 createNewChat();
             } else if (currentChatId === id) {
-                // If we deleted the active chat, switch to the first available one
-                // (Sorting happens in render, but chats array is source of truth)
-                // Note: The array might need re-sorting to find the true "top"
-                const sorted = getSortedChats();
-                if(sorted.length > 0) switchChat(sorted[0].id);
-                else createNewChat();
+                switchChat(chats[0].id);
             }
             activeMenuId = null;
         }
 
-        function getSortedChats() {
-            // Sort: Pinned first, then by creation (assuming new IDs are larger/newer or just array order)
-            // Since we unshift new chats, array index 0 is newest.
-            // Pinned should take precedence.
-            return [...chats].sort((a, b) => {
-                if (a.pinned === b.pinned) return 0; // Keep original order
-                return a.pinned ? -1 : 1; // Pinned moves up
-            });
-        }
-
         function renderChatList() {
-            chatListEl.innerHTML = '';
+            pinnedListEl.innerHTML = '';
+            unpinnedListEl.innerHTML = '';
             
-            // Use sorted list for display
-            const sortedChats = getSortedChats();
+            // Sort ensures index 0-X are pinned, Y-Z are unpinned
+            // This is critical for drag/drop indices to map correctly to the 'chats' array
+            sortChats(); 
 
-            sortedChats.forEach(chat => {
+            let hasPinned = false;
+            let hasUnpinned = false;
+
+            chats.forEach((chat, index) => {
                 const li = document.createElement('li');
                 li.className = `chat-tab ${chat.id === currentChatId ? 'active' : ''}`;
                 li.onclick = () => switchChat(chat.id);
                 
-                // Pin Icon
+                // DRAG ATTRIBUTES
+                li.draggable = true;
+                li.ondragstart = (e) => handleDragStart(e, index);
+                li.ondragover = (e) => handleDragOver(e);
+                li.ondrop = (e) => handleDrop(e, index);
+
                 const pinIcon = chat.pinned ? '<span class="pinned-icon">📌</span>' : '';
                 const pinText = chat.pinned ? 'Unpin Chat' : 'Pin Chat';
 
@@ -348,8 +417,24 @@
                         <div class="dropdown-item delete" onclick="deleteChat(event, '${chat.id}')">Delete</div>
                     </div>
                 `;
-                chatListEl.appendChild(li);
+                
+                if (chat.pinned) {
+                    pinnedListEl.appendChild(li);
+                    hasPinned = true;
+                } else {
+                    unpinnedListEl.appendChild(li);
+                    hasUnpinned = true;
+                }
             });
+
+            // Toggle visibility of headers/separators
+            if (hasPinned) {
+                pinnedHeaderEl.classList.add('visible');
+                separatorEl.classList.add('visible');
+            } else {
+                pinnedHeaderEl.classList.remove('visible');
+                separatorEl.classList.remove('visible');
+            }
         }
 
         function switchChat(id) {
@@ -357,11 +442,11 @@
             localStorage.setItem('local_ai_active_chat', id);
 
             const chat = chats.find(c => c.id === id);
-            
             chatContainerEl.innerHTML = '';
             
             if (!chat || chat.messages.length === 0) {
                 chatContainerEl.innerHTML = '<div style="text-align:center; margin-top:50px; color:#666;">Start chatting...</div>';
+                personaInput.disabled = false;
             } else {
                 chat.messages.forEach(msg => {
                     let contentToRender;
@@ -372,6 +457,7 @@
                     }
                     appendMessageToDOM(contentToRender, msg.role);
                 });
+                personaInput.disabled = true;
             }
             
             personaInput.value = (chat && chat.persona) ? chat.persona : "";
@@ -383,21 +469,16 @@
         }
 
         // --- GLOBAL EVENTS ---
-        
-        // Close menus when clicking anywhere else
         document.addEventListener('click', (e) => {
             if (activeMenuId) {
                 const menu = document.getElementById(`menu-${activeMenuId}`);
                 const btn = document.querySelector(`button[onclick="toggleMenu(event, '${activeMenuId}')"]`);
-                
-                // If click is not inside the menu and not on the button
                 if (menu && !menu.contains(e.target) && e.target !== btn) {
                     menu.classList.remove('show');
                     activeMenuId = null;
                 }
             }
 
-            // Close sidebar logic (Mobile)
             if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
                 if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
                     toggleSidebar(false);
@@ -415,7 +496,6 @@
         }
 
         // --- MESSAGING LOGIC ---
-        
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
@@ -451,10 +531,10 @@
 
             const chat = chats.find(c => c.id === currentChatId);
             
-            // Auto-title on first message
             if (chat.messages.length === 0) {
                 chat.title = text.substring(0, 30) + (text.length > 30 ? "..." : "");
                 chat.persona = persona;
+                personaInput.disabled = true; 
                 renderChatList();
             }
 
