@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local AI Chat - Streaming</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f4f9; }
+        
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
+        label { font-weight: bold; font-size: 0.9em; color: #555; }
+        
+        input[type="text"] { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit; }
+        #persona-input { background-color: #fff3cd; border-color: #ffeeba; width: 100%; box-sizing: border-box; }
+        #persona-input:disabled { background-color: #e9ecef; border-color: #ccc; color: #6c757d; cursor: not-allowed; }
+
+        #chat-box { 
+            height: 500px; 
+            border: 1px solid #ccc; 
+            overflow-y: scroll; 
+            padding: 20px; 
+            background: white; 
+            border-radius: 8px; 
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; line-height: 1.5; word-wrap: break-word; }
+        .user { align-self: flex-end; background-color: #007bff; color: white; }
+        .bot { align-self: flex-start; background-color: #e9ecef; color: black; }
+        
+        /* Markdown Styles */
+        .bot pre { background: #dcdcdc; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .bot code { font-family: monospace; background: #dcdcdc; padding: 2px 4px; border-radius: 3px; }
+        .bot p { margin: 0 0 10px 0; }
+        .bot p:last-child { margin-bottom: 0; }
+        
+        #input-area { display: flex; gap: 10px; }
+        #user-input { flex-grow: 1; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        button:disabled { background-color: #ccc; }
+    </style>
+</head>
+<body>
+
+    <h1>LM Studio Chat (Streaming)</h1>
+
+    <div class="input-group">
+        <label for="persona-input">System Persona:</label>
+        <input type="text" id="persona-input" placeholder="e.g., You are a helpful coder..." autocomplete="off">
+    </div>
+    
+    <div id="chat-box">
+        <div class="message bot">Ready to chat!</div>
+    </div>
+
+    <form id="chat-form">
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off" required>
+            <button type="submit" id="send-btn">Send</button>
+        </div>
+    </form>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const personaInput = document.getElementById('persona-input');
+        const chatBox = document.getElementById('chat-box');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Reset memory on load
+        window.onload = async () => {
+            try { await fetch('/reset', { method: 'POST' }); } catch(e) {}
+        };
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value;
+            const persona = personaInput.value;
+            if (!message) return;
+
+            // Lock persona
+            if (!personaInput.disabled) personaInput.disabled = true;
+
+            // 1. Add User Message
+            appendMessage(escapeHtml(message), 'user');
+            userInput.value = '';
+            sendBtn.disabled = true;
+
+            // 2. Create a placeholder for the Bot's response
+            const botMessageDiv = appendMessage('', 'bot'); 
+            let fullBotResponse = "";
+
+            try {
+                // 3. Initiate the request
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, persona: persona })
+                });
+
+                // 4. Setup the stream reader
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                // 5. Read the stream loop
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    // Decode chunk and append to our local string
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullBotResponse += chunk;
+
+                    // Update the UI immediately with rendered Markdown
+                    botMessageDiv.innerHTML = marked.parse(fullBotResponse);
+                    
+                    // Auto-scroll
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+
+            } catch (error) {
+                botMessageDiv.textContent = "Error: Connection failed.";
+            } finally {
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        });
+
+        function appendMessage(htmlContent, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.innerHTML = htmlContent;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return messageDiv; // Return the div so we can update it later
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
