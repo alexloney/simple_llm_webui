@@ -15,6 +15,7 @@
             --muted-text: #a0a0a0;
             --border-color: #333;
             --accent-color: #4caf50;
+            --error-color: #e53935;
             --user-msg-bg: #e0e0e0; 
             --user-msg-text: #333333;
             --hover-bg: #2a2a2a;
@@ -38,33 +39,37 @@
             z-index: 100;
         }
 
-        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .sidebar-header h2 { margin: 0; font-size: 1.1em; }
         .new-chat-btn { background: var(--accent-color); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 1.2em; }
         
-        /* Sidebar Lists Area */
+        /* Health Status Indicator */
+        #health-status {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.3s;
+        }
+        .status-online { background-color: rgba(76, 175, 80, 0.2); color: #81c784; border: 1px solid #2e7d32; }
+        .status-offline { background-color: rgba(229, 57, 53, 0.2); color: #e57373; border: 1px solid #c62828; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-online .status-dot { background-color: #4caf50; box-shadow: 0 0 5px #4caf50; }
+        .status-offline .status-dot { background-color: #e53935; }
+
+        /* Sidebar Lists */
         #sidebar-content { flex-grow: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        
         .chat-list { list-style: none; margin: 0; padding: 0; }
         
-        /* Section Dividers */
-        .section-header {
-            font-size: 0.75em;
-            color: #666;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            padding-left: 5px;
-            display: none; /* Hidden by default */
-        }
+        .section-header { font-size: 0.75em; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; padding-left: 5px; display: none; }
         .section-header.visible { display: block; }
-        
-        .separator {
-            height: 1px;
-            background-color: var(--border-color);
-            margin: 5px 0;
-            display: none;
-        }
+        .separator { height: 1px; background-color: var(--border-color); margin: 5px 0; display: none; }
         .separator.visible { display: block; }
 
         /* Chat Tabs */
@@ -84,8 +89,6 @@
         }
         .chat-tab:hover { background-color: var(--hover-bg); }
         .chat-tab.active { background-color: #333; color: white; font-weight: bold; }
-        
-        /* Dragging Styles */
         .chat-tab.dragging { opacity: 0.5; background-color: var(--drag-bg); border: 1px dashed #666; }
         .chat-tab.drag-over { border-bottom: 2px solid var(--accent-color); }
 
@@ -95,61 +98,22 @@
         .menu-btn { background: transparent; border: none; color: #666; cursor: pointer; font-size: 1.2em; padding: 0 8px; border-radius: 4px; }
         .menu-btn:hover { color: white; background-color: rgba(255,255,255,0.1); }
 
-        /* Dropdown Menu */
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 35px;
-            background-color: var(--menu-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            z-index: 200;
-            min-width: 120px;
-            overflow: hidden;
-        }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background-color: var(--menu-bg); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 200; min-width: 120px; }
         .dropdown-menu.show { display: block; }
-        
-        .dropdown-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 0.9em;
-            color: var(--text-color);
-            transition: background 0.1s;
-        }
+        .dropdown-item { padding: 8px 12px; cursor: pointer; font-size: 0.9em; color: var(--text-color); transition: background 0.1s; }
         .dropdown-item:hover { background-color: var(--hover-bg); }
         .dropdown-item.delete { color: #e53935; }
 
         /* Main Content */
         #main-content { flex-grow: 1; display: flex; flex-direction: column; position: relative; height: 100%; }
-
         #mobile-header { display: none; padding: 10px; background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); align-items: center; }
         #menu-btn { background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; margin-right: 15px; }
 
-        /* Chat Area */
         #chat-history-container { flex-grow: 1; overflow-y: auto; padding: 20px 40px; display: flex; flex-direction: column; scroll-behavior: smooth; }
         
         .message { margin: 12px 0; padding: 12px 16px; border-radius: 8px; max-width: 85%; line-height: 1.6; word-wrap: break-word; }
-        
-        .user { 
-            align-self: flex-end; 
-            background-color: var(--user-msg-bg); 
-            color: var(--user-msg-text); 
-            border-bottom-right-radius: 2px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        
-        .bot { 
-            align-self: flex-start; 
-            background-color: transparent; 
-            border: none; 
-            padding-left: 0;
-            padding-right: 0;
-            color: var(--text-color);
-            max-width: 90%;
-        }
-        
+        .user { align-self: flex-end; background-color: var(--user-msg-bg); color: var(--user-msg-text); border-bottom-right-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .bot { align-self: flex-start; background-color: transparent; border: none; padding: 0; color: var(--text-color); max-width: 90%; }
         .bot pre { background: #111; padding: 15px; border-radius: 6px; overflow-x: auto; border: 1px solid #333; }
         .bot code { font-family: monospace; background: rgba(255,255,255,0.1); padding: 2px 5px; border-radius: 3px; color: #e0e0e0; }
         
@@ -163,8 +127,12 @@
         textarea { flex-grow: 1; padding: 12px; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 6px; resize: none; height: 24px; max-height: 150px; }
         textarea:focus { outline: none; border-color: var(--accent-color); }
         
+        /* Disabled State for Textarea (Offline) */
+        textarea:disabled { background-color: #1a1a1a; color: #666; border-color: #333; cursor: not-allowed; }
+
         .action-btn { padding: 0 20px; height: 50px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
         #send-btn { background: var(--accent-color); }
+        #send-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
         #stop-btn { background: #e53935; display: none; }
 
         @media (max-width: 768px) {
@@ -181,16 +149,19 @@
     <div id="app-container">
         <aside id="sidebar">
             <div class="sidebar-header">
-                <h2>Chats</h2>
-                <button class="new-chat-btn" onclick="createNewChat()" title="New Chat">+</button>
+                <div class="header-top">
+                    <h2>Chats</h2>
+                    <button class="new-chat-btn" onclick="createNewChat()" title="New Chat">+</button>
+                </div>
+                <div id="health-status" class="status-offline">
+                    <span class="status-dot"></span> <span id="status-text">Checking...</span>
+                </div>
             </div>
             
             <div id="sidebar-content">
                 <div id="pinned-header" class="section-header">Pinned</div>
                 <ul id="pinned-list" class="chat-list"></ul>
-                
                 <div id="list-separator" class="separator"></div>
-
                 <ul id="unpinned-list" class="chat-list"></ul>
             </div>
         </aside>
@@ -219,7 +190,6 @@
             </div>
         </main>
     </div>
-
     <script>
         // --- STATE MANAGEMENT ---
         let chats = []; 
@@ -227,6 +197,8 @@
         let abortController = null;
         let activeMenuId = null; 
         let draggedItemIndex = null;
+        // OPTIMISTIC INITIALIZATION: Assume online
+        let isBackendOnline = true; 
 
         const pinnedListEl = document.getElementById('pinned-list');
         const unpinnedListEl = document.getElementById('unpinned-list');
@@ -240,6 +212,9 @@
         const stopBtn = document.getElementById('stop-btn');
         const sidebar = document.getElementById('sidebar');
         const menuBtn = document.getElementById('menu-btn');
+        
+        const healthStatusEl = document.getElementById('health-status');
+        const statusTextEl = document.getElementById('status-text');
 
         // --- INITIALIZATION ---
         window.onload = () => {
@@ -252,32 +227,76 @@
                 const targetId = chats.find(c => c.id === savedChatId) ? savedChatId : chats[0].id;
                 switchChat(targetId);
             }
+            
+            // Trigger immediately, then poll
+            checkHealth();
+            setInterval(checkHealth, 5000);
         };
 
-        function loadChats() {
-            const stored = localStorage.getItem('local_ai_chats');
-            if (stored) {
-                chats = JSON.parse(stored);
+        // --- HEALTH CHECK LOGIC ---
+        async function checkHealth() {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                const response = await fetch('/health', { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    setOnlineState(true);
+                } else {
+                    setOnlineState(false);
+                }
+            } catch (error) {
+                setOnlineState(false);
             }
         }
 
+        function setOnlineState(online) {
+            isBackendOnline = online;
+
+            // REMOVED THE GUARD CLAUSE HERE SO UI ALWAYS UPDATES
+            
+            if (online) {
+                healthStatusEl.className = 'status-online';
+                statusTextEl.textContent = 'LM Studio Online';
+                
+                // Unlock input if we aren't currently generating
+                if (stopBtn.style.display !== 'inline-block') {
+                    userInput.disabled = false;
+                    userInput.placeholder = "Type a message...";
+                    sendBtn.disabled = false;
+                }
+            } else {
+                healthStatusEl.className = 'status-offline';
+                statusTextEl.textContent = 'LM Studio Offline';
+                
+                // Only lock if we are truly offline
+                userInput.disabled = true;
+                userInput.placeholder = "Waiting for connection...";
+                sendBtn.disabled = true;
+            }
+        }
+
+        function loadChats() {
+            const stored = localStorage.getItem('local_ai_chats');
+            if (stored) chats = JSON.parse(stored);
+        }
+
         function saveChats() {
-            // Ensure sorting is preserved in storage
             sortChats();
             localStorage.setItem('local_ai_chats', JSON.stringify(chats));
             renderChatList();
         }
 
         function sortChats() {
-            // Sort by pinned status (Pinned first). 
-            // Note: Within sections, we rely on the existing array order (drag and drop order)
             chats.sort((a, b) => {
                 if (a.pinned === b.pinned) return 0;
                 return a.pinned ? -1 : 1;
             });
         }
 
-        // --- SIDEBAR & TABS ---
+        // --- SIDEBAR ---
         function createNewChat() {
             const newId = Date.now().toString();
             const newChat = {
@@ -287,15 +306,13 @@
                 messages: [],
                 persona: ""
             };
-            // Add new chat. If unpinned, add after pinned items.
-            // Simplified: Unshift to top, then sort will place it correctly (top of unpinned)
             chats.unshift(newChat);
             saveChats();
             switchChat(newId);
             if (window.innerWidth <= 768) toggleSidebar(false);
         }
 
-        // --- DRAG AND DROP HANDLERS ---
+        // --- DRAG AND DROP ---
         function handleDragStart(e, index) {
             draggedItemIndex = index;
             e.target.classList.add('dragging');
@@ -313,12 +330,8 @@
 
             if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
 
-            // SECTION GUARD: Prevent dragging between Pinned and Unpinned
-            if (chats[draggedItemIndex].pinned !== chats[targetIndex].pinned) {
-                return; // Do nothing
-            }
+            if (chats[draggedItemIndex].pinned !== chats[targetIndex].pinned) return;
 
-            // Move Item
             const itemToMove = chats[draggedItemIndex];
             chats.splice(draggedItemIndex, 1); 
             chats.splice(targetIndex, 0, itemToMove); 
@@ -327,7 +340,7 @@
             draggedItemIndex = null;
         }
 
-        // --- MENU LOGIC ---
+        // --- MENU ---
         function toggleMenu(e, id) {
             e.stopPropagation(); 
             if (activeMenuId && activeMenuId !== id) {
@@ -359,31 +372,23 @@
             e.stopPropagation();
             const chat = chats.find(c => c.id === id);
             chat.pinned = !chat.pinned;
-            saveChats(); // This triggers sort and re-render
+            saveChats();
             activeMenuId = null;
         }
 
         function deleteChat(e, id) {
             e.stopPropagation();
-            if (!confirm("Are you sure you want to delete this chat?")) return;
-            
+            if (!confirm("Delete this chat?")) return;
             chats = chats.filter(c => c.id !== id);
             saveChats();
-
-            if (chats.length === 0) {
-                createNewChat();
-            } else if (currentChatId === id) {
-                switchChat(chats[0].id);
-            }
+            if (chats.length === 0) createNewChat();
+            else if (currentChatId === id) switchChat(chats[0].id);
             activeMenuId = null;
         }
 
         function renderChatList() {
             pinnedListEl.innerHTML = '';
             unpinnedListEl.innerHTML = '';
-            
-            // Sort ensures index 0-X are pinned, Y-Z are unpinned
-            // This is critical for drag/drop indices to map correctly to the 'chats' array
             sortChats(); 
 
             let hasPinned = false;
@@ -394,7 +399,6 @@
                 li.className = `chat-tab ${chat.id === currentChatId ? 'active' : ''}`;
                 li.onclick = () => switchChat(chat.id);
                 
-                // DRAG ATTRIBUTES
                 li.draggable = true;
                 li.ondragstart = (e) => handleDragStart(e, index);
                 li.ondragover = (e) => handleDragOver(e);
@@ -408,9 +412,7 @@
                         ${pinIcon}
                         <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${chat.title}</span>
                     </div>
-                    
                     <button class="menu-btn" onclick="toggleMenu(event, '${chat.id}')">⋮</button>
-                    
                     <div id="menu-${chat.id}" class="dropdown-menu">
                         <div class="dropdown-item" onclick="renameChat(event, '${chat.id}')">Rename</div>
                         <div class="dropdown-item" onclick="togglePin(event, '${chat.id}')">${pinText}</div>
@@ -427,7 +429,6 @@
                 }
             });
 
-            // Toggle visibility of headers/separators
             if (hasPinned) {
                 pinnedHeaderEl.classList.add('visible');
                 separatorEl.classList.add('visible');
@@ -440,7 +441,6 @@
         function switchChat(id) {
             currentChatId = id;
             localStorage.setItem('local_ai_active_chat', id);
-
             const chat = chats.find(c => c.id === id);
             chatContainerEl.innerHTML = '';
             
@@ -450,25 +450,19 @@
             } else {
                 chat.messages.forEach(msg => {
                     let contentToRender;
-                    if (msg.role === 'user') {
-                        contentToRender = escapeHtml(msg.content);
-                    } else {
-                        contentToRender = marked.parse(msg.content);
-                    }
+                    if (msg.role === 'user') contentToRender = escapeHtml(msg.content);
+                    else contentToRender = marked.parse(msg.content);
                     appendMessageToDOM(contentToRender, msg.role);
                 });
                 personaInput.disabled = true;
             }
-            
             personaInput.value = (chat && chat.persona) ? chat.persona : "";
-            
             renderChatList();
             scrollToBottom();
-            
             if (window.innerWidth <= 768) toggleSidebar(false);
         }
 
-        // --- GLOBAL EVENTS ---
+        // --- GLOBAL ---
         document.addEventListener('click', (e) => {
             if (activeMenuId) {
                 const menu = document.getElementById(`menu-${activeMenuId}`);
@@ -478,11 +472,8 @@
                     activeMenuId = null;
                 }
             }
-
             if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-                if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-                    toggleSidebar(false);
-                }
+                if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) toggleSidebar(false);
             }
         });
 
@@ -495,7 +486,7 @@
             }
         }
 
-        // --- MESSAGING LOGIC ---
+        // --- INPUT ---
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
@@ -505,13 +496,14 @@
         userInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
+                // Rely on 'disabled' state
                 if (!sendBtn.disabled) sendMessage();
             }
         });
 
         document.getElementById('input-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            sendMessage();
+            if (!sendBtn.disabled) sendMessage();
         });
 
         stopBtn.addEventListener('click', () => {
@@ -556,13 +548,11 @@
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: text, 
-                        persona: persona,
-                        history: historyPayload
-                    }),
+                    body: JSON.stringify({ message: text, persona: persona, history: historyPayload }),
                     signal: abortController.signal
                 });
+
+                if (!response.ok) throw new Error("Backend Error");
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
@@ -575,12 +565,12 @@
                     botMsgDiv.innerHTML = marked.parse(fullBotResponse);
                     scrollToBottom();
                 }
-
                 saveHistory('assistant', fullBotResponse);
 
             } catch (error) {
                 if (error.name !== 'AbortError') {
-                    botMsgDiv.innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
+                    botMsgDiv.innerHTML = `<span style="color:red">Error: Could not connect to AI.</span>`;
+                    setOnlineState(false);
                 }
             } finally {
                 endGenerationState();
@@ -588,7 +578,6 @@
             }
         }
 
-        // --- HELPERS ---
         function saveHistory(role, content) {
             const chat = chats.find(c => c.id === currentChatId);
             if (chat) {
@@ -619,8 +608,10 @@
         function endGenerationState() {
             sendBtn.style.display = 'inline-block';
             stopBtn.style.display = 'none';
-            userInput.disabled = false;
-            userInput.focus();
+            if (isBackendOnline) {
+                userInput.disabled = false;
+                userInput.focus();
+            }
         }
 
         function escapeHtml(text) {

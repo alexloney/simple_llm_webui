@@ -14,13 +14,11 @@ client = OpenAI(
 TOKEN_THRESHOLD = 3000 
 
 def estimate_tokens(messages):
-    """Roughly estimate token count (1 token ~= 4 chars)."""
     if not messages: return 0
     total_chars = sum(len(str(m.get('content', ''))) for m in messages)
     return total_chars // 4
 
 def summarize_history(history_chunk):
-    """Asks the LLM to summarize a slice of the conversation."""
     try:
         summary_prompt = [
             {"role": "system", "content": "You are a helpful assistant."},
@@ -42,37 +40,41 @@ def summarize_history(history_chunk):
 def home():
     return render_template('index.html')
 
+# --- NEW HEALTH CHECK ENDPOINT ---
+@app.route('/health')
+def health_check():
+    """Checks if LM Studio is reachable."""
+    try:
+        # Attempt to fetch models to verify connection
+        # A short timeout is ideal here, but the client defaults are usually okay for localhost
+        client.models.list() 
+        return jsonify({"status": "online"})
+    except Exception as e:
+        return jsonify({"status": "offline", "error": str(e)}), 503
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json
     user_input = data.get('message')
-    # Frontend now sends the whole history
     incoming_history = data.get('history', [])
     persona = data.get('persona', "You are a helpful AI assistant.")
     
     if not user_input:
         return "No message provided", 400
 
-    # Prepare the list for processing
-    # If history is empty, add persona. 
-    # Note: Frontend sends [ {role, content}... ]
     processing_history = list(incoming_history)
     
     if not processing_history or processing_history[0].get('role') != 'system':
         processing_history.insert(0, {"role": "system", "content": persona})
 
-    # Append the NEW user message for context
     processing_history.append({"role": "user", "content": user_input})
 
-    # --- MEMORY OPTIMIZATION (Server Side) ---
-    # We optimize what we send to the LLM, but we don't delete the user's browser history
     current_tokens = estimate_tokens(processing_history)
     
     if current_tokens > TOKEN_THRESHOLD:
         if len(processing_history) > 4: 
             print(f"Compressing context... (Current: {current_tokens} tokens)")
             persona_msg = processing_history[0]
-            # Keep last 2 exchanges (4 messages) + current user prompt
             recent_msgs = processing_history[-5:] 
             middle_msgs = processing_history[1:-5]
 
