@@ -1,12 +1,19 @@
+import os
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify
 from openai import OpenAI
 import json
 
 app = Flask(__name__)
 
+# CONFIGURATION
+# Fetch from environment variable, or default to Docker-friendly host address
+LM_STUDIO_URL = os.getenv("LM_STUDIO_URL", "http://localhost:1234/v1")
+
+print(f"Connecting to LM Studio at: {LM_STUDIO_URL}")
+
 # Point to LM Studio's local server
 client = OpenAI(
-    base_url="http://localhost:1234/v1",
+    base_url=LM_STUDIO_URL,
     api_key="lm-studio"
 )
 
@@ -104,4 +111,5 @@ def chat():
     return Response(stream_with_context(generate()), mimetype='text/plain')
 
 if __name__ == '__main__':
+    # host='0.0.0.0' is REQUIRED for Docker to expose the server
     app.run(debug=True, port=5000, host='0.0.0.0')

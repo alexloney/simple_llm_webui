@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  local-chat-app:
+    build: .
+    container_name: local-ai-chat
+    ports:
+      - "5000:5000"
+    environment:
+      # This overrides the default in the Python script.
+      # 'host.docker.internal' allows the container to talk to your computer's localhost.
+      - LM_STUDIO_URL=http://host.docker.internal:1234/v1
+    
+    # This section is critical for Linux users to resolve 'host.docker.internal'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
