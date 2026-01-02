@@ -50,3 +50,33 @@ In your project terminal, run:
 
 ```bash
 python app.py
+```
+
+You should see output indicating the server is running on `http://0.0.0.0:5000`.
+
+### 3. Access the Chat
+* **On the same computer:** Open your browser and go to `http://localhost:5000`.
+* **On another device (Phone/Laptop):
+  1.  Find your computer's local IP address (Run `ipconfig` on Windows or `ifconfig` on Mac/Linux).
+  2.  On the other device, browse to `http://<YOUR_IP_ADDRESS>:5000` (e.g. `http://192.168.1.15:6000`).
+
+## Configuration
+* **Changing the Port:** Edit the `app.run` line in `app.py`:
+  ```
+  app.run(debug=True, port=8080, host='0.0.0.0')
+  ```
+* **Adjusting AI Creativity:** Modify the `temperature` parameter in the `client.chat.completions.create` call inside `app.py`.(0.7 is balanced; 0.2 is precise; 1.0 is creative).
+
+## Dependencies
+* Flask - Web framework
+* OpenAI Python Library - To communicate with LM Studio's API.
+* Marked.js - (Frontend) Used via CDN to render Markdown.
+
+## Troubleshooting
+* **"Connection Refused":** Ensure LM Studio server is actually started and running on port `1234`.
+* **"No module named flask":** Ensure you ran `pip install flask`.
+* **Cannot connect from phone:** Ensure your computer's firewall allows incoming connections on port 5000, and that both devices are on the same Wi-Fi.
+
+## License
+This project is open-source and free to use.
+  
